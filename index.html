@@ -1,0 +1,421 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1, user-scalable=no">
+<title>Liability Waiver — Alaska Unique Adventures</title>
+<style>
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    background: #f4f5f7;
+    color: #1c1e21;
+    line-height: 1.5;
+  }
+  .container {
+    max-width: 720px;
+    margin: 0 auto;
+    padding: 16px;
+  }
+  header {
+    text-align: center;
+    padding: 24px 16px 8px;
+  }
+  header h1 {
+    font-size: 1.4rem;
+    margin: 0;
+  }
+  .waiver-text {
+    background: #fff;
+    border: 1px solid #d9dbe0;
+    border-radius: 10px;
+    padding: 18px;
+    max-height: 320px;
+    overflow-y: auto;
+    font-size: 0.92rem;
+    margin: 16px 0;
+  }
+  .waiver-text h2 {
+    font-size: 1.05rem;
+    margin-top: 0;
+  }
+  .waiver-text p {
+    margin: 0 0 12px;
+  }
+  .waiver-text ol {
+    padding-left: 1.2em;
+    margin: 0 0 12px;
+  }
+  .waiver-text li {
+    margin-bottom: 12px;
+  }
+  form {
+    background: #fff;
+    border: 1px solid #d9dbe0;
+    border-radius: 10px;
+    padding: 18px;
+  }
+  .field {
+    margin-bottom: 18px;
+  }
+  .field-row {
+    display: flex;
+    gap: 12px;
+  }
+  .field-row .field {
+    flex: 1;
+    min-width: 0;
+  }
+  .field-row-3 .field:nth-child(2) {
+    flex: 0.6;
+  }
+  .field-row-3 .field:nth-child(3) {
+    flex: 0.7;
+  }
+  .section-divider {
+    border: none;
+    border-top: 1px solid #d9dbe0;
+    margin: 28px 0 20px;
+  }
+  .section-heading {
+    font-size: 1.05rem;
+    margin: 0 0 4px;
+  }
+  .section-subheading {
+    font-size: 0.85rem;
+    color: #666;
+    margin: 0 0 18px;
+  }
+  .guardian-clause {
+    font-size: 0.9rem;
+    color: #333;
+    margin: 0 0 18px;
+  }
+  label {
+    display: block;
+    font-weight: 600;
+    font-size: 0.9rem;
+    margin-bottom: 6px;
+  }
+  input[type="text"],
+  input[type="email"],
+  input[type="date"] {
+    width: 100%;
+    padding: 12px;
+    font-size: 1rem;
+    border: 1px solid #c7cad1;
+    border-radius: 8px;
+    -webkit-appearance: none;
+  }
+  input:focus {
+    outline: 2px solid #2563eb;
+    outline-offset: 1px;
+  }
+  .checkbox-field {
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+  }
+  .checkbox-field input[type="checkbox"] {
+    width: 22px;
+    height: 22px;
+    flex-shrink: 0;
+    margin-top: 2px;
+  }
+  .checkbox-field label {
+    font-weight: 400;
+    margin-bottom: 0;
+  }
+  .signature-wrap {
+    border: 1px solid #c7cad1;
+    border-radius: 8px;
+    overflow: hidden;
+    touch-action: none;
+    background: #fff;
+  }
+  #signature-pad {
+    display: block;
+    width: 100%;
+    height: 200px;
+  }
+  .signature-actions {
+    display: flex;
+    justify-content: flex-end;
+    margin-top: 8px;
+  }
+  button {
+    font-size: 1rem;
+    font-family: inherit;
+    cursor: pointer;
+  }
+  .btn-clear {
+    background: none;
+    border: 1px solid #c7cad1;
+    border-radius: 8px;
+    padding: 10px 16px;
+    color: #444;
+  }
+  .btn-submit {
+    width: 100%;
+    padding: 16px;
+    background: #2563eb;
+    color: #fff;
+    border: none;
+    border-radius: 10px;
+    font-weight: 600;
+    font-size: 1.05rem;
+    margin-top: 8px;
+  }
+  .btn-submit:disabled {
+    background: #93b4f0;
+    cursor: not-allowed;
+  }
+  .error {
+    color: #c0392b;
+    font-size: 0.88rem;
+    margin-top: 10px;
+    min-height: 1.2em;
+  }
+  .confirmation {
+    display: none;
+    background: #fff;
+    border: 1px solid #d9dbe0;
+    border-radius: 10px;
+    padding: 32px 18px;
+    text-align: center;
+  }
+  .confirmation h2 {
+    margin-top: 0;
+    color: #16794f;
+  }
+</style>
+</head>
+<body>
+<div class="container">
+  <header>
+    <h1>Participant Agreement, Release and Assumption of Risk</h1>
+  </header>
+
+  <div class="waiver-text">
+    <p>In consideration of the services of Alaska Unique Adventures LLC d/b/a Alaskan Adventure Haven, their agents, owners, officers, volunteers, employees, and all other persons or entities acting in any capacity on their behalf (hereinafter collectively referred to as &ldquo;AUA&rdquo;), I hereby agree to release, indemnify, and discharge AUA on behalf of myself, my spouse, my children, my parents, my heirs, assigns, personal representative and estate as follows:</p>
+    <ol>
+      <li>I acknowledge that my participation in Guided Activities: Overnight Hiking, Camping, Backpacking, Watersport Activities&mdash;Canoe, Kayak, SUPs, Ski Trips &ndash; Cross Country Skiing and Snow Shoeing, Ice Skating as part of a Tour, Snow Hill Sledding, UTV, Snowmobiling, Ice Climbing activities all entail known and unanticipated risks that could result in physical or emotional injury, paralysis, death, or damage to myself, to property, or to third parties. I understand that such risks simply cannot be eliminated without jeopardizing the essential qualities of the activity.
+      <p><strong>The risks include, among other things:</strong> slips and falls; falls from significant heights; the possibility of rough terrain; passengers can be jolted, jarred, bounced around, thrown about and otherwise shaken during rides; it is possible that riders could be injured if they come into contact with other passengers or equipment; injuries can be sustained from the trail, equipment or from items on the trail such as holes, bumps, ruts, obstacles, tree limbs and branches or rocks; riding on uneven and out of control terrain, changing snow conditions and variations in elevations; snow depth, instability of snow pack; steepness of slopes; loss of nature including extremes of weather, lightning and rapid weather changes, exposure to sun, strong wind, cold, large waves, eddies and whirlpools, tidal conditions, surf and currents; major injuries are a risk as are sprains, strains, scratches, bruises, abrasions, cuts, lacerations, broken bones, fractures, musculoskeletal injuries including head, neck, and back injuries; injuries to internal organs; loss of fingers or other appendages; exposure to the elements of the outdoors and natural surroundings which could cause heat exhaustion, heat stroke, sunburn, frostbite, frost nip, dehydration; and exposure to potentially dangerous wild animals, insect bites, and hazardous plant life; the negligence of participants, or other persons who may be present, or traveling in remote areas; or varying and difficult weather; further, passengers can be thrown off the vehicle which can result in any of the above events occurring; collision with fixed or movable objects; collisions, and flipping over; transmissible pathogen or disease; accidents or illness can occur in remote places without medical facilities and emergency treatment or other services rendered; any machine itself may fail; and accidents can occur getting in, out, on or off; traveling to and from activity locations raises the possibility of any manner of transportation accidents; additionally, fatigue, chill and/or dizziness may diminish my/our reaction time and increase the risk of an accident.</p>
+      </li>
+      <li>I expressly agree and promise to accept and assume all of the risks existing in this activity. My participation in this activity is purely voluntary, and I elect to participate in spite of the risks. I agree to wear a properly fitted and secured DOT or SNELL certified helmet while participating in UTV, Snowmobiling, and Ice Climbing Activities. Additionally, I agree to wear a U.S. Coast Guard-approved personal flotation device (life jacket) while participating in all water activities.</li>
+      <li>I hereby voluntarily release, forever discharge, and agree to indemnify and hold harmless AUA from any and all claims, demands, or causes of action, which are in any way connected with my participation in this activity or my use of AUA&rsquo;s equipment or facilities, including any such claims which allege negligent acts or omissions of AUA.</li>
+      <li>Should AUA or anyone acting on their behalf be required to incur attorney&rsquo;s fees and costs to enforce this agreement, I agree to indemnify and hold them harmless for all such fees and costs.</li>
+      <li>I certify that I have adequate insurance to cover any injury or damage I may cause or suffer while participating, or else I agree to bear the costs of such injury or damage myself. I further certify that I am willing to assume the risk of any medical or physical condition I may have.</li>
+      <li>In the event that I file a lawsuit against AUA, I agree to do so solely in the state of Alaska, and I further agree that the substantive law of that state shall apply in that action without regard to the conflict of law rules of that state. I agree that if any portion of this agreement is found to be void or unenforceable, the remaining document shall remain in full force and effect.</li>
+    </ol>
+    <p>By signing this document, I acknowledge that if anyone is hurt or property is damaged during my participation in this activity, I may be found by a court of law to have waived my right to maintain a lawsuit against AUA on the basis of any claim from which I have released them herein. I also agree that this document is valid for subsequent visits and participation at AUA. I have had sufficient opportunity to read this entire document. I have read and understood it, and I agree to be bound by its terms.</p>
+  </div>
+
+  <form id="waiver-form">
+    <div class="field">
+      <label for="name">Print Name</label>
+      <input type="text" id="name" name="name" autocomplete="name" required>
+    </div>
+
+    <div class="field-row">
+      <div class="field">
+        <label for="dob">DOB</label>
+        <input type="date" id="dob" name="dob">
+      </div>
+      <div class="field">
+        <label for="phone">Phone Number</label>
+        <input type="text" id="phone" name="phone" autocomplete="tel" inputmode="tel">
+      </div>
+    </div>
+
+    <div class="field">
+      <label for="address">Address</label>
+      <input type="text" id="address" name="address" autocomplete="street-address">
+    </div>
+
+    <div class="field-row field-row-3">
+      <div class="field">
+        <label for="city">City</label>
+        <input type="text" id="city" name="city" autocomplete="address-level2">
+      </div>
+      <div class="field">
+        <label for="state">State</label>
+        <input type="text" id="state" name="state" autocomplete="address-level1">
+      </div>
+      <div class="field">
+        <label for="zip">Zip</label>
+        <input type="text" id="zip" name="zip" autocomplete="postal-code" inputmode="numeric">
+      </div>
+    </div>
+
+    <div class="field">
+      <label for="email">Email</label>
+      <input type="email" id="email" name="email" autocomplete="email">
+    </div>
+
+    <div class="field checkbox-field">
+      <input type="checkbox" id="agree" name="agree">
+      <label for="agree">I have read and agree to the terms above</label>
+    </div>
+
+    <div class="field">
+      <label for="signature-pad">Signature of Participant</label>
+      <div class="signature-wrap">
+        <canvas id="signature-pad"></canvas>
+      </div>
+      <div class="signature-actions">
+        <button type="button" class="btn-clear" id="clear-signature">Clear</button>
+      </div>
+    </div>
+
+    <div class="field">
+      <label for="signed_date">Date</label>
+      <input type="date" id="signed_date" name="signed_date" required>
+    </div>
+
+    <hr class="section-divider">
+
+    <h2 class="section-heading">Parents' or Guardian's Additional Indemnification</h2>
+    <p class="section-subheading">(Must be completed for participants under the age of 18)</p>
+
+    <div class="field">
+      <label for="minor_info">In consideration of the following minor(s): (print name(s) and DOB(s))</label>
+      <input type="text" id="minor_info" name="minor_info">
+    </div>
+
+    <p class="guardian-clause">Being permitted by AUA to participate in its activities and to use its equipment and facilities, I further agree to indemnify and hold harmless AUA from any and all claims which are brought by, or on behalf of, minor(s), and which are in any way connected with such use or participation by minor(s).</p>
+
+    <div class="field">
+      <label for="guardian-signature-pad">Parent or Guardian Signature</label>
+      <div class="signature-wrap">
+        <canvas id="guardian-signature-pad"></canvas>
+      </div>
+      <div class="signature-actions">
+        <button type="button" class="btn-clear" id="clear-guardian-signature">Clear</button>
+      </div>
+    </div>
+
+    <div class="field">
+      <label for="guardian_print_name">Print Name</label>
+      <input type="text" id="guardian_print_name" name="guardian_print_name">
+    </div>
+
+    <div class="field">
+      <label for="guardian_date">Date</label>
+      <input type="date" id="guardian_date" name="guardian_date">
+    </div>
+
+    <button type="submit" class="btn-submit" id="submit-btn">Sign &amp; Submit</button>
+    <div class="error" id="form-error"></div>
+  </form>
+
+  <div class="confirmation" id="confirmation">
+    <h2>Thank you, waiver signed</h2>
+    <p>Your signature has been recorded. You may now close this page.</p>
+  </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/signature_pad@4.1.7/dist/signature_pad.umd.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script>
+  const SUPABASE_URL = "https://ibcjvmsxhyzhvsncxvmb.supabase.co";
+  const SUPABASE_ANON_KEY = "sb_publishable_Ayzi6LlUSNeAA9p3-NDi1g_CaC0JqSk";
+  const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+  function setupPad(canvasId) {
+    const canvas = document.getElementById(canvasId);
+    const pad = new SignaturePad(canvas, { backgroundColor: "rgb(255,255,255)" });
+    function resizeCanvas() {
+      const ratio = Math.max(window.devicePixelRatio || 1, 1);
+      const data = pad.toData();
+      canvas.width = canvas.offsetWidth * ratio;
+      canvas.height = canvas.offsetHeight * ratio;
+      canvas.getContext("2d").scale(ratio, ratio);
+      pad.clear();
+      if (data.length) pad.fromData(data);
+    }
+    window.addEventListener("resize", resizeCanvas);
+    resizeCanvas();
+    return pad;
+  }
+
+  const pad = setupPad("signature-pad");
+  const guardianPad = setupPad("guardian-signature-pad");
+
+  document.getElementById("clear-signature").addEventListener("click", () => pad.clear());
+  document.getElementById("clear-guardian-signature").addEventListener("click", () => guardianPad.clear());
+
+  const dateInput = document.getElementById("signed_date");
+  dateInput.value = new Date().toISOString().slice(0, 10);
+
+  const form = document.getElementById("waiver-form");
+  const errorEl = document.getElementById("form-error");
+  const submitBtn = document.getElementById("submit-btn");
+
+  function fieldValue(id) {
+    return document.getElementById(id).value.trim();
+  }
+
+  form.addEventListener("submit", async (e) => {
+    e.preventDefault();
+    errorEl.textContent = "";
+
+    const name = fieldValue("name");
+    const email = fieldValue("email");
+    const signedDate = dateInput.value;
+    const agreed = document.getElementById("agree").checked;
+    const minorInfo = fieldValue("minor_info");
+    const guardianPrintName = fieldValue("guardian_print_name");
+    const guardianDate = document.getElementById("guardian_date").value;
+
+    if (!name) {
+      errorEl.textContent = "Please enter your full name.";
+      return;
+    }
+    if (!agreed) {
+      errorEl.textContent = "Please check the box to confirm you agree to the terms.";
+      return;
+    }
+    if (pad.isEmpty()) {
+      errorEl.textContent = "Please provide your signature.";
+      return;
+    }
+    if (minorInfo && guardianPad.isEmpty()) {
+      errorEl.textContent = "Please provide the parent or guardian signature for the listed minor(s).";
+      return;
+    }
+
+    submitBtn.disabled = true;
+    submitBtn.textContent = "Submitting...";
+
+    const { error } = await supabaseClient.rpc("submit_waiver_signature", {
+      p_name: name,
+      p_email: email || null,
+      p_signed_date: signedDate,
+      p_signature_image: pad.toDataURL("image/png"),
+      p_dob: document.getElementById("dob").value || null,
+      p_phone: fieldValue("phone") || null,
+      p_address: fieldValue("address") || null,
+      p_city: fieldValue("city") || null,
+      p_state: fieldValue("state") || null,
+      p_zip: fieldValue("zip") || null,
+      p_minor_info: minorInfo || null,
+      p_guardian_print_name: guardianPrintName || null,
+      p_guardian_signature_image: guardianPad.isEmpty() ? null : guardianPad.toDataURL("image/png"),
+      p_guardian_date: guardianDate || null
+    });
+
+    if (error) {
+      errorEl.textContent = "Something went wrong submitting your waiver. Please try again.";
+      submitBtn.disabled = false;
+      submitBtn.textContent = "Sign & Submit";
+      return;
+    }
+
+    form.style.display = "none";
+    document.getElementById("confirmation").style.display = "block";
+  });
+</script>
+</body>
+</html>
