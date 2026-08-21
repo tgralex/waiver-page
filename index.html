@@ -100,17 +100,27 @@
   }
   input[type="text"],
   input[type="email"],
-  input[type="date"] {
+  input[type="date"],
+  select {
     width: 100%;
     padding: 12px;
     font-size: 1rem;
     border: 1px solid #c7cad1;
     border-radius: 8px;
     -webkit-appearance: none;
+    background: #fff;
+    font-family: inherit;
   }
-  input:focus {
+  input:focus,
+  select:focus {
     outline: 2px solid #2563eb;
     outline-offset: 1px;
+  }
+  .field-hint {
+    font-size: 0.8rem;
+    color: #666;
+    min-height: 1.1em;
+    margin-top: 4px;
   }
   .checkbox-field {
     display: flex;
@@ -237,15 +247,19 @@
     <div class="field-row field-row-3">
       <div class="field">
         <label for="city">City</label>
-        <input type="text" id="city" name="city" autocomplete="address-level2">
+        <input type="text" id="city" name="city" list="city-list" autocomplete="address-level2">
+        <datalist id="city-list"></datalist>
       </div>
       <div class="field">
         <label for="state">State</label>
-        <input type="text" id="state" name="state" autocomplete="address-level1">
+        <select id="state" name="state" autocomplete="address-level1">
+          <option value="">Select…</option>
+        </select>
       </div>
       <div class="field">
         <label for="zip">Zip</label>
-        <input type="text" id="zip" name="zip" autocomplete="postal-code" inputmode="numeric">
+        <input type="text" id="zip" name="zip" autocomplete="postal-code" inputmode="numeric" maxlength="10">
+        <div class="field-hint" id="zip-hint"></div>
       </div>
     </div>
 
@@ -355,6 +369,83 @@
 
   document.getElementById("clear-signature").addEventListener("click", () => pad.clear());
   document.getElementById("clear-guardian-signature").addEventListener("click", () => guardianPad.clear());
+
+  const US_STATES = [
+    ["AL", "Alabama"], ["AK", "Alaska"], ["AZ", "Arizona"], ["AR", "Arkansas"],
+    ["CA", "California"], ["CO", "Colorado"], ["CT", "Connecticut"], ["DE", "Delaware"],
+    ["DC", "District of Columbia"], ["FL", "Florida"], ["GA", "Georgia"], ["HI", "Hawaii"],
+    ["ID", "Idaho"], ["IL", "Illinois"], ["IN", "Indiana"], ["IA", "Iowa"],
+    ["KS", "Kansas"], ["KY", "Kentucky"], ["LA", "Louisiana"], ["ME", "Maine"],
+    ["MD", "Maryland"], ["MA", "Massachusetts"], ["MI", "Michigan"], ["MN", "Minnesota"],
+    ["MS", "Mississippi"], ["MO", "Missouri"], ["MT", "Montana"], ["NE", "Nebraska"],
+    ["NV", "Nevada"], ["NH", "New Hampshire"], ["NJ", "New Jersey"], ["NM", "New Mexico"],
+    ["NY", "New York"], ["NC", "North Carolina"], ["ND", "North Dakota"], ["OH", "Ohio"],
+    ["OK", "Oklahoma"], ["OR", "Oregon"], ["PA", "Pennsylvania"], ["RI", "Rhode Island"],
+    ["SC", "South Carolina"], ["SD", "South Dakota"], ["TN", "Tennessee"], ["TX", "Texas"],
+    ["UT", "Utah"], ["VT", "Vermont"], ["VA", "Virginia"], ["WA", "Washington"],
+    ["WV", "West Virginia"], ["WI", "Wisconsin"], ["WY", "Wyoming"],
+  ];
+
+  const stateSelect = document.getElementById("state");
+  for (const [abbr, fullName] of US_STATES) {
+    const opt = document.createElement("option");
+    opt.value = abbr;
+    opt.textContent = `${fullName} (${abbr})`;
+    stateSelect.appendChild(opt);
+  }
+
+  // Zip lookup: auto-fills city/state as a convenience, but city and zip stay
+  // free-text fields — a 5-digit US zip won't always be in the lookup, and
+  // international or new zips shouldn't block anyone from filling the form by hand.
+  const zipInput = document.getElementById("zip");
+  const zipHint = document.getElementById("zip-hint");
+  const cityInput = document.getElementById("city");
+  const cityList = document.getElementById("city-list");
+
+  async function lookupZip() {
+    const zip = zipInput.value.trim();
+    if (!/^\d{5}$/.test(zip)) {
+      zipHint.textContent = "";
+      return;
+    }
+    zipHint.textContent = "Looking up city/state…";
+    try {
+      const res = await fetch(`https://api.zippopotam.us/us/${zip}`);
+      if (!res.ok) {
+        zipHint.textContent = "";
+        return;
+      }
+      const data = await res.json();
+      const places = Array.isArray(data.places) ? data.places : [];
+      if (places.length === 0) {
+        zipHint.textContent = "";
+        return;
+      }
+
+      cityList.innerHTML = "";
+      for (const place of places) {
+        const opt = document.createElement("option");
+        opt.value = place["place name"];
+        cityList.appendChild(opt);
+      }
+
+      if (!cityInput.value.trim()) {
+        cityInput.value = places[0]["place name"];
+      }
+      const stateAbbr = places[0]["state abbreviation"];
+      if (stateAbbr && !stateSelect.value) {
+        stateSelect.value = stateAbbr;
+      }
+      zipHint.textContent = "";
+    } catch {
+      zipHint.textContent = "";
+    }
+  }
+
+  zipInput.addEventListener("blur", lookupZip);
+  zipInput.addEventListener("input", () => {
+    if (/^\d{5}$/.test(zipInput.value.trim())) lookupZip();
+  });
 
   const dateInput = document.getElementById("signed_date");
   dateInput.value = new Date().toISOString().slice(0, 10);
