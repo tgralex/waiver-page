@@ -333,9 +333,8 @@
 <script src="https://cdn.jsdelivr.net/npm/signature_pad@4.1.7/dist/signature_pad.umd.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script>
-  const SUPABASE_URL = "https://ibcjvmsxhyzhvsncxvmb.supabase.co";
-  const SUPABASE_ANON_KEY = "sb_publishable_Ayzi6LlUSNeAA9p3-NDi1g_CaC0JqSk";
-  const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+  let supabaseClient = null;
+  let ownerEmail = null;
 
   function setupPad(canvasId) {
     const canvas = document.getElementById(canvasId);
@@ -357,15 +356,28 @@
   const pad = setupPad("signature-pad");
   const guardianPad = setupPad("guardian-signature-pad");
 
-  let ownerEmail = null;
+  const submitBtn = document.getElementById("submit-btn");
+  const errorEl = document.getElementById("form-error");
+  submitBtn.disabled = true;
+  submitBtn.textContent = "Loading...";
+
   fetch("./config.json")
-    .then((r) => (r.ok ? r.json() : null))
+    .then((r) => (r.ok ? r.json() : Promise.reject(new Error("config.json not found"))))
     .then((config) => {
-      if (config && typeof config.ownerEmail === "string") {
+      if (typeof config.ownerEmail === "string") {
         ownerEmail = config.ownerEmail;
       }
+      if (!config.supabaseUrl || !config.supabaseAnonKey) {
+        throw new Error("config.json is missing supabaseUrl or supabaseAnonKey");
+      }
+      supabaseClient = supabase.createClient(config.supabaseUrl, config.supabaseAnonKey);
+      submitBtn.disabled = false;
+      submitBtn.textContent = "Sign & Submit";
     })
-    .catch(() => {});
+    .catch((err) => {
+      console.error(err);
+      errorEl.textContent = "This page failed to load its configuration. Please refresh, or contact us if the problem continues.";
+    });
 
   document.getElementById("clear-signature").addEventListener("click", () => pad.clear());
   document.getElementById("clear-guardian-signature").addEventListener("click", () => guardianPad.clear());
@@ -451,8 +463,6 @@
   dateInput.value = new Date().toISOString().slice(0, 10);
 
   const form = document.getElementById("waiver-form");
-  const errorEl = document.getElementById("form-error");
-  const submitBtn = document.getElementById("submit-btn");
 
   function fieldValue(id) {
     return document.getElementById(id).value.trim();
@@ -461,6 +471,11 @@
   form.addEventListener("submit", async (e) => {
     e.preventDefault();
     errorEl.textContent = "";
+
+    if (!supabaseClient) {
+      errorEl.textContent = "This page hasn't finished loading its configuration yet. Please wait a moment and try again.";
+      return;
+    }
 
     const name = fieldValue("name");
     const email = fieldValue("email");
