@@ -343,6 +343,16 @@
   const pad = setupPad("signature-pad");
   const guardianPad = setupPad("guardian-signature-pad");
 
+  let ownerEmail = null;
+  fetch("./config.json")
+    .then((r) => (r.ok ? r.json() : null))
+    .then((config) => {
+      if (config && typeof config.ownerEmail === "string") {
+        ownerEmail = config.ownerEmail;
+      }
+    })
+    .catch(() => {});
+
   document.getElementById("clear-signature").addEventListener("click", () => pad.clear());
   document.getElementById("clear-guardian-signature").addEventListener("click", () => guardianPad.clear());
 
@@ -389,21 +399,24 @@
     submitBtn.disabled = true;
     submitBtn.textContent = "Submitting...";
 
-    const { error } = await supabaseClient.rpc("submit_waiver_signature", {
-      p_name: name,
-      p_email: email || null,
-      p_signed_date: signedDate,
-      p_signature_image: pad.toDataURL("image/png"),
-      p_dob: document.getElementById("dob").value || null,
-      p_phone: fieldValue("phone") || null,
-      p_address: fieldValue("address") || null,
-      p_city: fieldValue("city") || null,
-      p_state: fieldValue("state") || null,
-      p_zip: fieldValue("zip") || null,
-      p_minor_info: minorInfo || null,
-      p_guardian_print_name: guardianPrintName || null,
-      p_guardian_signature_image: guardianPad.isEmpty() ? null : guardianPad.toDataURL("image/png"),
-      p_guardian_date: guardianDate || null
+    const { error } = await supabaseClient.functions.invoke("wv-submit-waiver", {
+      body: {
+        name: name,
+        email: email || null,
+        signedDate: signedDate,
+        signatureImage: pad.toDataURL("image/png"),
+        dob: document.getElementById("dob").value || null,
+        phone: fieldValue("phone") || null,
+        address: fieldValue("address") || null,
+        city: fieldValue("city") || null,
+        state: fieldValue("state") || null,
+        zip: fieldValue("zip") || null,
+        minorInfo: minorInfo || null,
+        guardianPrintName: guardianPrintName || null,
+        guardianSignatureImage: guardianPad.isEmpty() ? null : guardianPad.toDataURL("image/png"),
+        guardianDate: guardianDate || null,
+        ownerEmail: ownerEmail
+      }
     });
 
     if (error) {
