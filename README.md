@@ -19,9 +19,18 @@ This document describes what the backend does today and what a future admin/owne
 
 ## Supabase project
 
-Currently `Tigrans_DB_kmm` (project ref `ibcjvmsxhyzhvsncxvmb`) — **shared** with other unrelated apps (`kmm`, `job-search`, `ink`, `iss`/Ingenious Software Solutions, etc.) in the same Supabase org. The waiver data lives in its own `wv` schema so it doesn't collide with the others, but it is not an isolated project.
+**Every deployment of this page — including each contributor's own fork or environment — should use its own dedicated Supabase project and its own mailing/SMTP setup.** Don't share a project across unrelated apps; don't share SMTP credentials with someone else's mailbox. `supabase/schema.sql` and `supabase/functions/wv-submit-waiver/index.ts` in this repo are exactly what's live today, checked in so a new contributor can stand up their own project without needing this written up again. See "Setup for a new deployment" below.
 
-> Open question: should AUA get its own dedicated Supabase project instead of sharing this one? A move was started but blocked on the account's 2-project free-tier limit and an inaccessible second org — see the session's earlier discussion if picking this back up.
+(The reference deployment this was built against currently lives on `Tigrans_DB_kmm`, project ref `ibcjvmsxhyzhvsncxvmb` — shared with unrelated apps in that org. That's an artifact of how this was originally built, not the intended pattern going forward.)
+
+### Setup for a new deployment
+
+1. Create a new Supabase project (free tier is enough).
+2. Run `supabase/schema.sql` against it — SQL Editor in the Dashboard, or `supabase db execute -f supabase/schema.sql` via the CLI. This creates the `wv` schema, the `waiver_signatures` table with RLS enabled and no policies, and the `public.submit_waiver_signature` RPC.
+3. Deploy the Edge Function: `supabase functions deploy wv-submit-waiver` (from `supabase/functions/wv-submit-waiver/index.ts`), or paste its contents into the Dashboard's Edge Function editor. Leave `verify_jwt` on — it should require the anon/publishable key like any other `supabase-js` call.
+4. Set your own mailbox's SMTP secrets on the project (see "Email" below for the exact names) — get an app password / SMTP credentials from whatever email account you want submissions to send from.
+5. Update `config.json` at the repo root with this project's URL, its publishable/anon key (Project Settings → API), and the owner email you want BCC'd on every submission.
+6. Submit a test waiver through the page and confirm: the row lands in `wv.waiver_signatures`, and the email with the attached PDF arrives at both the test "customer" address and the owner's BCC.
 
 ## Database: `wv.waiver_signatures`
 
@@ -79,11 +88,9 @@ One email per submission, sent via SMTP (`denomailer`):
 - **From:** `Alaska Unique Adventures <CONTACT_EMAIL_FROM>` — display name is hardcoded, the address comes from a secret.
 - **Attachment:** the freshly generated PDF, or none if PDF generation failed.
 
-SMTP secrets currently reused from the project's existing `iss-contact-inquiry` function (`SMTP_HOST`, `SMTP_PORT`, `SMTP_USERNAME`, `SMTP_PASSWORD`, `SMTP_SECURE`, `CONTACT_EMAIL_FROM`) — set as Supabase Edge Function secrets, which this session has no API access to read or write (Dashboard → Project Settings → Edge Functions → Secrets, or `supabase secrets set` via the CLI).
+SMTP settings are read from Supabase Edge Function secrets — `SMTP_HOST`, `SMTP_PORT`, `SMTP_USERNAME`, `SMTP_PASSWORD`, `SMTP_SECURE`, `CONTACT_EMAIL_FROM` — set per-project via Dashboard → Project Settings → Edge Functions → Secrets, or `supabase secrets set` via the CLI. Set your own mailbox's credentials here; don't reuse someone else's. If they're unset, the function logs `wv_email_skipped_no_smtp_config` and skips sending — the submission still succeeds and is still saved.
 
-> Open item: a dedicated mailbox (`support@alaskanadventurehaven.ingenioussoftwaresolutions.com`) was created for AUA specifically, to stop reusing Ingenious Software Solutions' shared address. Wiring it in requires its SMTP host/port/username/password, set as secrets on this project — not done yet.
-
-If `SMTP_HOST`/`SMTP_USERNAME`/etc. are unset, the function logs `wv_email_skipped_no_smtp_config` and skips sending — the submission still succeeds and is still saved.
+(The reference deployment currently reuses SMTP secrets from an unrelated function in the shared `Tigrans_DB_kmm` project. A dedicated mailbox, `support@alaskanadventurehaven.ingenioussoftwaresolutions.com`, has been created to replace that but isn't wired in yet — needs its host/port/username/password set as secrets.)
 
 ## Potential expansion: owner dashboard page
 
