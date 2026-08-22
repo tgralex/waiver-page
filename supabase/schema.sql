@@ -24,6 +24,7 @@ create table if not exists wv.waiver_signatures (
   zip text,
   minor_info text,
   guardian_print_name text,
+  guardian_dob date,
   guardian_signature_image text,
   guardian_date date,
   created_at timestamptz not null default now()
@@ -33,6 +34,14 @@ create table if not exists wv.waiver_signatures (
 -- the anon/authenticated roles. All access goes through the SECURITY
 -- DEFINER function below (owned by `postgres`, which bypasses RLS).
 alter table wv.waiver_signatures enable row level security;
+
+-- Drop the previous 14-arg signature before recreating with the new
+-- p_guardian_dob parameter: CREATE OR REPLACE cannot change a function's
+-- parameter list, only its body, so a changed signature otherwise creates
+-- a second overload instead of replacing the original.
+drop function if exists public.submit_waiver_signature(
+  text, text, date, text, date, text, text, text, text, text, text, text, text, date
+);
 
 create or replace function public.submit_waiver_signature(
   p_name text,
@@ -47,6 +56,7 @@ create or replace function public.submit_waiver_signature(
   p_zip text default null,
   p_minor_info text default null,
   p_guardian_print_name text default null,
+  p_guardian_dob date default null,
   p_guardian_signature_image text default null,
   p_guardian_date date default null
 )
@@ -61,12 +71,12 @@ begin
   insert into wv.waiver_signatures (
     name, email, signed_date, signature_image,
     dob, phone, address, city, state, zip,
-    minor_info, guardian_print_name, guardian_signature_image, guardian_date
+    minor_info, guardian_print_name, guardian_dob, guardian_signature_image, guardian_date
   )
   values (
     p_name, p_email, p_signed_date, p_signature_image,
     p_dob, p_phone, p_address, p_city, p_state, p_zip,
-    p_minor_info, p_guardian_print_name, p_guardian_signature_image, p_guardian_date
+    p_minor_info, p_guardian_print_name, p_guardian_dob, p_guardian_signature_image, p_guardian_date
   )
   returning id into v_id;
   return v_id;
@@ -74,8 +84,8 @@ end;
 $$;
 
 revoke all on function public.submit_waiver_signature(
-  text, text, date, text, date, text, text, text, text, text, text, text, text, date
+  text, text, date, text, date, text, text, text, text, text, text, text, date, text, date
 ) from public;
 grant execute on function public.submit_waiver_signature(
-  text, text, date, text, date, text, text, text, text, text, text, text, text, date
+  text, text, date, text, date, text, text, text, text, text, text, text, date, text, date
 ) to anon, authenticated;

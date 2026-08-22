@@ -34,6 +34,20 @@
     return bytes;
   }
 
+  const PDF_MONTH_NAMES = [
+    'Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun',
+    'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec',
+  ];
+
+  function formatPdfDate(dateStr) {
+    const m = /^(\d{4})-(\d{2})-(\d{2})$/.exec(dateStr || '');
+    if (!m) return dateStr || '';
+    const [, year, month, day] = m;
+    const monthIdx = parseInt(month, 10) - 1;
+    if (monthIdx < 0 || monthIdx > 11) return dateStr;
+    return `${PDF_MONTH_NAMES[monthIdx]} ${parseInt(day, 10)} ${year}`;
+  }
+
 const WAIVER_TITLE = 'Participant Agreement, Release and Assumption of Risk';
 
 const WAIVER_INTRO =
@@ -166,12 +180,12 @@ const WAIVER_CLOSING =
 
     const rows = [
       ['Print Name', data.name],
-      ['Date of Birth', data.dob || ''],
+      ['Date of Birth', formatPdfDate(data.dob || '')],
       ['Phone Number', data.phone || ''],
       ['Email', data.email || ''],
       ['Address', data.address || ''],
       ['City / State / Zip', `${data.city || ''}, ${data.state || ''} ${data.zip || ''}`.trim()],
-      ['Date Signed', data.signedDate || ''],
+      ['Date Signed', formatPdfDate(data.signedDate || '')],
     ];
     for (const [label, value] of rows) {
       drawLine(`${label}: ${value}`, 10, font);
@@ -199,8 +213,11 @@ const WAIVER_CLOSING =
       if (data.guardianPrintName) {
         drawLine(`Guardian Print Name: ${data.guardianPrintName}`, 10, font);
       }
+      if (data.guardianDob) {
+        drawLine(`Guardian Date of Birth: ${formatPdfDate(data.guardianDob)}`, 10, font);
+      }
       if (data.guardianDate) {
-        drawLine(`Guardian Date: ${data.guardianDate}`, 10, font);
+        drawLine(`Guardian Date Signed: ${formatPdfDate(data.guardianDate)}`, 10, font);
       }
       if (data.guardianSignatureImage) {
         y -= 6;

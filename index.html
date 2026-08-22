@@ -116,6 +116,10 @@
     outline: 2px solid #2563eb;
     outline-offset: 1px;
   }
+  input[readonly] {
+    background: #f4f5f7;
+    color: #555;
+  }
   .field-hint {
     font-size: 0.8rem;
     color: #666;
@@ -297,8 +301,8 @@
     </div>
 
     <div class="field">
-      <label for="signed_date">Date</label>
-      <input type="date" id="signed_date" name="signed_date" required>
+      <label for="signed_date">Date Signed</label>
+      <input type="date" id="signed_date" name="signed_date" required readonly>
     </div>
 
     <hr class="section-divider">
@@ -329,8 +333,14 @@
     </div>
 
     <div class="field">
+      <label for="guardian_dob">Parent/Guardian Date of Birth</label>
+      <input type="date" id="guardian_dob" name="guardian_dob">
+      <div class="field-hint" id="guardian-dob-hint"></div>
+    </div>
+
+    <div class="field">
       <label for="guardian_date">Date Signed</label>
-      <input type="date" id="guardian_date" name="guardian_date">
+      <input type="date" id="guardian_date" name="guardian_date" readonly>
     </div>
 
     <button type="submit" class="btn-submit" id="submit-btn">Sign &amp; Submit</button>
@@ -389,6 +399,7 @@
         minorAgeThreshold = config.minorAgeThreshold;
       }
       updateMinorStatus();
+      updateGuardianDobHint();
       if (!config.supabaseUrl || !config.supabaseAnonKey) {
         throw new Error("config.json is missing supabaseUrl or supabaseAnonKey");
       }
@@ -522,6 +533,25 @@
   dobInput.addEventListener("change", updateMinorStatus);
   updateMinorStatus();
 
+  const guardianDobInput = document.getElementById("guardian_dob");
+  const guardianDobHint = document.getElementById("guardian-dob-hint");
+
+  function isGuardianAdult() {
+    const age = calculateAge(guardianDobInput.value);
+    return age !== null && age >= minorAgeThreshold;
+  }
+
+  function updateGuardianDobHint() {
+    const age = calculateAge(guardianDobInput.value);
+    guardianDobHint.textContent =
+      age !== null && age < minorAgeThreshold
+        ? `Parent/guardian must be at least ${minorAgeThreshold} to sign (currently ${age}).`
+        : "";
+  }
+
+  guardianDobInput.addEventListener("input", updateGuardianDobHint);
+  guardianDobInput.addEventListener("change", updateGuardianDobHint);
+
   const form = document.getElementById("waiver-form");
 
   function fieldValue(id) {
@@ -543,6 +573,7 @@
     const agreed = document.getElementById("agree").checked;
     const minorInfo = fieldValue("minor_info");
     const guardianPrintName = fieldValue("guardian_print_name");
+    const guardianDob = guardianDobInput.value;
     const guardianDate = document.getElementById("guardian_date").value;
 
     if (!name) {
@@ -566,6 +597,14 @@
       errorEl.textContent = "Please have the parent or guardian print their name.";
       return;
     }
+    if (guardianRequired && !guardianDob) {
+      errorEl.textContent = "Please enter the parent or guardian's date of birth.";
+      return;
+    }
+    if (guardianRequired && !isGuardianAdult()) {
+      errorEl.textContent = "The parent or guardian must be at least " + minorAgeThreshold + " years old.";
+      return;
+    }
 
     submitBtn.disabled = true;
     submitBtn.textContent = "Submitting...";
@@ -583,6 +622,7 @@
       zip: fieldValue("zip") || null,
       minorInfo: minorInfo || null,
       guardianPrintName: guardianPrintName || null,
+      guardianDob: guardianDob || null,
       guardianSignatureImage: guardianPad.isEmpty() ? null : guardianPad.toDataURL("image/png"),
       guardianDate: guardianDate || null,
       ownerEmail: ownerEmail,
@@ -630,6 +670,7 @@
     guardianDateInput.value = new Date().toISOString().slice(0, 10);
     zipHint.textContent = "";
     updateMinorStatus();
+    updateGuardianDobHint();
     lastSubmittedWaiver = null;
     errorEl.textContent = "";
     submitBtn.disabled = false;

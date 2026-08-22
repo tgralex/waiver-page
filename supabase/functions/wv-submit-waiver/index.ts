@@ -37,6 +37,7 @@ interface WaiverPayload {
   zip?: string;
   minorInfo?: string;
   guardianPrintName?: string;
+  guardianDob?: string;
   guardianSignatureImage?: string;
   guardianDate?: string;
   ownerEmail?: string;
@@ -94,6 +95,7 @@ Deno.serve(async (req) => {
     minorInfo: typeof b.minorInfo === 'string' ? b.minorInfo.trim() || undefined : undefined,
     guardianPrintName:
       typeof b.guardianPrintName === 'string' ? b.guardianPrintName.trim() || undefined : undefined,
+    guardianDob: typeof b.guardianDob === 'string' ? b.guardianDob || undefined : undefined,
     guardianSignatureImage:
       typeof b.guardianSignatureImage === 'string' &&
       b.guardianSignatureImage.startsWith('data:image/png;base64,')
@@ -122,6 +124,7 @@ Deno.serve(async (req) => {
       p_zip: payload.zip ?? null,
       p_minor_info: payload.minorInfo ?? null,
       p_guardian_print_name: payload.guardianPrintName ?? null,
+      p_guardian_dob: payload.guardianDob ?? null,
       p_guardian_signature_image: payload.guardianSignatureImage ?? null,
       p_guardian_date: payload.guardianDate ?? null,
     },
@@ -176,6 +179,20 @@ function bytesToBase64(bytes: Uint8Array): string {
     binary += String.fromCharCode(...bytes.subarray(i, i + chunkSize));
   }
   return btoa(binary);
+}
+
+const PDF_MONTH_NAMES = [
+  'Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun',
+  'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec',
+];
+
+function formatPdfDate(dateStr: string): string {
+  const m = /^(\d{4})-(\d{2})-(\d{2})$/.exec(dateStr || '');
+  if (!m) return dateStr || '';
+  const [, year, month, day] = m;
+  const monthIdx = parseInt(month, 10) - 1;
+  if (monthIdx < 0 || monthIdx > 11) return dateStr;
+  return `${PDF_MONTH_NAMES[monthIdx]} ${parseInt(day, 10)} ${year}`;
 }
 
 const WAIVER_TITLE = 'Participant Agreement, Release and Assumption of Risk';
@@ -308,12 +325,12 @@ async function buildWaiverPdf(data: WaiverPayload): Promise<Uint8Array> {
 
   const rows: Array<[string, string]> = [
     ['Print Name', data.name],
-    ['Date of Birth', data.dob || ''],
+    ['Date of Birth', formatPdfDate(data.dob || '')],
     ['Phone Number', data.phone || ''],
     ['Email', data.email || ''],
     ['Address', data.address || ''],
     ['City / State / Zip', `${data.city || ''}, ${data.state || ''} ${data.zip || ''}`.trim()],
-    ['Date Signed', data.signedDate || ''],
+    ['Date Signed', formatPdfDate(data.signedDate || '')],
   ];
   for (const [label, value] of rows) {
     drawLine(`${label}: ${value}`, 10, font);
@@ -341,8 +358,11 @@ async function buildWaiverPdf(data: WaiverPayload): Promise<Uint8Array> {
     if (data.guardianPrintName) {
       drawLine(`Guardian Print Name: ${data.guardianPrintName}`, 10, font);
     }
+    if (data.guardianDob) {
+      drawLine(`Guardian Date of Birth: ${formatPdfDate(data.guardianDob)}`, 10, font);
+    }
     if (data.guardianDate) {
-      drawLine(`Guardian Date: ${data.guardianDate}`, 10, font);
+      drawLine(`Guardian Date Signed: ${formatPdfDate(data.guardianDate)}`, 10, font);
     }
     if (data.guardianSignatureImage) {
       y -= 6;
