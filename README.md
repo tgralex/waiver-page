@@ -1,21 +1,25 @@
 # waiver-page
 
-Static liability waiver signing page for Alaska Unique Adventures (AUA). No build step — `index.html` is served as-is, with `config.json` alongside it for the values that change without a code edit.
+Static liability waiver signing page. No build step — `index.html` is served as-is, with `config.json` alongside it for the values that change without a code edit, and `waiver-content.json` for the waiver's legal text. Together those two files make the project company-agnostic: pointing it at a different company is a matter of editing `config.json` and swapping `waiver-content.json`, not touching code. The reference deployment described below is for Alaska Unique Adventures (AUA).
 
 This document describes what the backend does today and what a future admin/owner dashboard would need.
 
 ## Frontend
 
-- `index.html` — the signing page. Loads `config.json` at runtime (via `fetch`, so it must be served over `http(s)://`, not opened as a local file) before it will let anyone submit.
+- `index.html` — the signing page. Loads `config.json` and `waiver-content.json` at runtime (via `fetch`, so it must be served over `http(s)://`, not opened as a local file) before it will let anyone submit.
 - `config.json` — plain-text, not secret:
   ```json
   {
+    "companyName": "Alaskan Adventure Haven",
+    "companyUrl": "https://alaskanadventurehaven.com/",
     "ownerEmail": "tgralex@gmail.com",
     "supabaseUrl": "https://ibcjvmsxhyzhvsncxvmb.supabase.co",
-    "supabaseAnonKey": "sb_publishable_..."
+    "supabaseAnonKey": "sb_publishable_...",
+    "minorAgeThreshold": 18
   }
   ```
-  `supabaseAnonKey` is the publishable/anon key — safe to expose client-side by design. Editing this file (no redeploy of code needed) changes the owner's BCC address or repoints the whole page at a different Supabase project.
+  `supabaseAnonKey` is the publishable/anon key — safe to expose client-side by design. `companyName`/`companyUrl` drive the clickable header at the top of the page and the browser tab title; `companyUrl` is optional — omit it and the header renders as plain (non-linked) text. Editing this file (no redeploy of code needed) changes the owner's BCC address, the minor-age cutoff, the branding, or repoints the whole page at a different Supabase project.
+- `waiver-content.json` — the waiver's legal text (`title`, `intro`, `items`, `closing`), read by `index.html` for the on-page terms and by `waiver-pdf.js` for the client-side "Download my waiver" PDF. The Edge Function (below) reads its own copy of this same file, bundled alongside its source — see "Setup for a new deployment". This is the one file to replace wholesale when adapting the project for a different company's waiver text.
 
 ## Supabase project
 
@@ -27,9 +31,9 @@ This document describes what the backend does today and what a future admin/owne
 
 1. Create a new Supabase project (free tier is enough).
 2. Run `supabase/schema.sql` against it — SQL Editor in the Dashboard, or `supabase db execute -f supabase/schema.sql` via the CLI. This creates the `wv` schema, the `waiver_signatures` table with RLS enabled and no policies, and the `public.submit_waiver_signature` RPC.
-3. Deploy the Edge Function: `supabase functions deploy wv-submit-waiver` (from `supabase/functions/wv-submit-waiver/index.ts`), or paste its contents into the Dashboard's Edge Function editor. Leave `verify_jwt` on — it should require the anon/publishable key like any other `supabase-js` call.
+3. Deploy the Edge Function: `supabase functions deploy wv-submit-waiver` (from `supabase/functions/wv-submit-waiver/index.ts`), making sure `waiver-content.json` is deployed alongside it (copy it into `supabase/functions/wv-submit-waiver/` first, or otherwise ensure it's bundled — the function reads it via `Deno.readTextFile` at cold start, relative to its own source). Leave `verify_jwt` on — it should require the anon/publishable key like any other `supabase-js` call.
 4. Set your own mailbox's SMTP secrets on the project (see "Email" below for the exact names) — get an app password / SMTP credentials from whatever email account you want submissions to send from.
-5. Update `config.json` at the repo root with this project's URL, its publishable/anon key (Project Settings → API), and the owner email you want BCC'd on every submission.
+5. Update `config.json` at the repo root with this project's URL, its publishable/anon key (Project Settings → API), the owner email you want BCC'd on every submission, and this company's name/URL. Edit `waiver-content.json` with this company's own waiver text.
 6. Submit a test waiver through the page and confirm: the row lands in `wv.waiver_signatures`, and the email with the attached PDF arrives at both the test "customer" address and the owner's BCC.
 
 ## Database: `wv.waiver_signatures`
@@ -49,6 +53,7 @@ This document describes what the backend does today and what a future admin/owne
 | `zip` | text | yes | |
 | `minor_info` | text | yes | free text: minor name(s) and DOB(s), only when signing on behalf of a minor |
 | `guardian_print_name` | text | yes | |
+| `guardian_dob` | date | yes | used client-side to enforce the guardian is at or above `minorAgeThreshold` |
 | `guardian_signature_image` | text | yes | guardian signature, same `data:image/png;base64,...` format |
 | `guardian_date` | date | yes | |
 | `created_at` | timestamptz | no | `now()`, server-assigned |
@@ -62,7 +67,7 @@ PostgREST (and any `supabase-js` client, including from an Edge Function) only e
 ## PDF: built from the pieces we have, not stored anywhere
 
 There is no PDF file stored in the database or in Supabase Storage. The `wv-submit-waiver` Edge Function reconstructs the PDF **on every submission**, in-memory, from:
-1. The waiver's fixed legal text (hardcoded in the function, identical to what's shown on the page).
+1. The waiver's fixed legal text — read from `waiver-content.json` (bundled with the function, see "Setup for a new deployment"), the same file `index.html` and `waiver-pdf.js` read for the on-page terms and the client-side PDF.
 2. The row's own fields (name, dob, phone, address, city/state/zip, signed_date, and the guardian fields when present).
 3. The two signature PNGs (`signature_image`, `guardian_signature_image`), embedded as images via `pdf-lib`.
 

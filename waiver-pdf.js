@@ -48,71 +48,19 @@
     return `${PDF_MONTH_NAMES[monthIdx]} ${parseInt(day, 10)} ${year}`;
   }
 
-const WAIVER_TITLE = 'Participant Agreement, Release and Assumption of Risk';
-
-const WAIVER_INTRO =
-  'In consideration of the services of Alaska Unique Adventures LLC d/b/a Alaskan Adventure Haven, ' +
-  'their agents, owners, officers, volunteers, employees, and all other persons or entities acting in any ' +
-  'capacity on their behalf (hereinafter collectively referred to as "AUA"), I hereby agree to release, ' +
-  'indemnify, and discharge AUA on behalf of myself, my spouse, my children, my parents, my heirs, assigns, ' +
-  'personal representative and estate as follows:';
-
-const WAIVER_ITEMS = [
-  'I acknowledge that my participation in Guided Activities: Overnight Hiking, Camping, Backpacking, ' +
-    'Watersport Activities-Canoe, Kayak, SUPs, Ski Trips - Cross Country Skiing and Snow Shoeing, Ice Skating ' +
-    'as part of a Tour, Snow Hill Sledding, UTV, Snowmobiling, Ice Climbing activities all entail known and ' +
-    'unanticipated risks that could result in physical or emotional injury, paralysis, death, or damage to ' +
-    'myself, to property, or to third parties. I understand that such risks simply cannot be eliminated ' +
-    'without jeopardizing the essential qualities of the activity. The risks include, among other things: ' +
-    'slips and falls; falls from significant heights; the possibility of rough terrain; passengers can be ' +
-    'jolted, jarred, bounced around, thrown about and otherwise shaken during rides; it is possible that ' +
-    'riders could be injured if they come into contact with other passengers or equipment; injuries can be ' +
-    'sustained from the trail, equipment or from items on the trail such as holes, bumps, ruts, obstacles, ' +
-    'tree limbs and branches or rocks; riding on uneven and out of control terrain, changing snow conditions ' +
-    'and variations in elevations; snow depth, instability of snow pack; steepness of slopes; loss of nature ' +
-    'including extremes of weather, lightning and rapid weather changes, exposure to sun, strong wind, cold, ' +
-    'large waves, eddies and whirlpools, tidal conditions, surf and currents; major injuries are a risk as ' +
-    'are sprains, strains, scratches, bruises, abrasions, cuts, lacerations, broken bones, fractures, ' +
-    'musculoskeletal injuries including head, neck, and back injuries; injuries to internal organs; loss of ' +
-    'fingers or other appendages; exposure to the elements of the outdoors and natural surroundings which ' +
-    'could cause heat exhaustion, heat stroke, sunburn, frostbite, frost nip, dehydration; and exposure to ' +
-    'potentially dangerous wild animals, insect bites, and hazardous plant life; the negligence of ' +
-    'participants, or other persons who may be present, or traveling in remote areas; or varying and ' +
-    'difficult weather; further, passengers can be thrown off the vehicle which can result in any of the ' +
-    'above events occurring; collision with fixed or movable objects; collisions, and flipping over; ' +
-    'transmissible pathogen or disease; accidents or illness can occur in remote places without medical ' +
-    'facilities and emergency treatment or other services rendered; any machine itself may fail; and ' +
-    'accidents can occur getting in, out, on or off; traveling to and from activity locations raises the ' +
-    'possibility of any manner of transportation accidents; additionally, fatigue, chill and/or dizziness ' +
-    'may diminish my/our reaction time and increase the risk of an accident.',
-  'I expressly agree and promise to accept and assume all of the risks existing in this activity. My ' +
-    'participation in this activity is purely voluntary, and I elect to participate in spite of the risks. I ' +
-    'agree to wear a properly fitted and secured DOT or SNELL certified helmet while participating in UTV, ' +
-    'Snowmobiling, and Ice Climbing Activities. Additionally, I agree to wear a U.S. Coast Guard-approved ' +
-    'personal flotation device (life jacket) while participating in all water activities.',
-  'I hereby voluntarily release, forever discharge, and agree to indemnify and hold harmless AUA from any ' +
-    'and all claims, demands, or causes of action, which are in any way connected with my participation in ' +
-    'this activity or my use of AUA\'s equipment or facilities, including any such claims which allege ' +
-    'negligent acts or omissions of AUA.',
-  'Should AUA or anyone acting on their behalf be required to incur attorney\'s fees and costs to enforce ' +
-    'this agreement, I agree to indemnify and hold them harmless for all such fees and costs.',
-  'I certify that I have adequate insurance to cover any injury or damage I may cause or suffer while ' +
-    'participating, or else I agree to bear the costs of such injury or damage myself. I further certify ' +
-    'that I am willing to assume the risk of any medical or physical condition I may have.',
-  'In the event that I file a lawsuit against AUA, I agree to do so solely in the state of Alaska, and I ' +
-    'further agree that the substantive law of that state shall apply in that action without regard to the ' +
-    'conflict of law rules of that state. I agree that if any portion of this agreement is found to be void ' +
-    'or unenforceable, the remaining document shall remain in full force and effect.',
-];
-
-const WAIVER_CLOSING =
-  'By signing this document, I acknowledge that if anyone is hurt or property is damaged during my ' +
-  'participation in this activity, I may be found by a court of law to have waived my right to maintain a ' +
-  'lawsuit against AUA on the basis of any claim from which I have released them herein. I also agree that ' +
-  'this document is valid for subsequent visits and participation at AUA. I have had sufficient opportunity ' +
-  'to read this entire document. I have read and understood it, and I agree to be bound by its terms.';
+  let waiverContentPromise = null;
+  function loadWaiverContent() {
+    if (!waiverContentPromise) {
+      waiverContentPromise = fetch('./waiver-content.json').then((r) =>
+        r.ok ? r.json() : Promise.reject(new Error('waiver-content.json not found'))
+      );
+    }
+    return waiverContentPromise;
+  }
 
   async function buildWaiverPdf(data) {
+    const { title: WAIVER_TITLE, intro: WAIVER_INTRO, items: WAIVER_ITEMS, closing: WAIVER_CLOSING } =
+      await loadWaiverContent();
     const { PDFDocument, StandardFonts, rgb } = window.PDFLib;
     const pdfDoc = await PDFDocument.create();
     const font = await pdfDoc.embedFont(StandardFonts.Helvetica);

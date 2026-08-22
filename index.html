@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1, user-scalable=no">
-<title>Liability Waiver — Alaska Unique Adventures</title>
+<title>Liability Waiver</title>
 <style>
   * { box-sizing: border-box; }
   body {
@@ -25,6 +25,21 @@
   header h1 {
     font-size: 1.4rem;
     margin: 0;
+  }
+  .company-link {
+    display: inline-block;
+    font-size: 1.1rem;
+    font-weight: 700;
+    color: #2563eb;
+    text-decoration: none;
+    margin-bottom: 10px;
+  }
+  .company-link:hover {
+    text-decoration: underline;
+  }
+  span.company-link {
+    color: #1c1e21;
+    cursor: default;
   }
   .waiver-text {
     background: #fff;
@@ -220,22 +235,14 @@
 <body>
 <div class="container">
   <header>
-    <h1>Participant Agreement, Release and Assumption of Risk</h1>
+    <a class="company-link" id="company-link" href="#" target="_blank" rel="noopener"></a>
+    <h1 id="waiver-title"></h1>
   </header>
 
   <div class="waiver-text">
-    <p>In consideration of the services of Alaska Unique Adventures LLC d/b/a Alaskan Adventure Haven, their agents, owners, officers, volunteers, employees, and all other persons or entities acting in any capacity on their behalf (hereinafter collectively referred to as &ldquo;AUA&rdquo;), I hereby agree to release, indemnify, and discharge AUA on behalf of myself, my spouse, my children, my parents, my heirs, assigns, personal representative and estate as follows:</p>
-    <ol>
-      <li>I acknowledge that my participation in Guided Activities: Overnight Hiking, Camping, Backpacking, Watersport Activities&mdash;Canoe, Kayak, SUPs, Ski Trips &ndash; Cross Country Skiing and Snow Shoeing, Ice Skating as part of a Tour, Snow Hill Sledding, UTV, Snowmobiling, Ice Climbing activities all entail known and unanticipated risks that could result in physical or emotional injury, paralysis, death, or damage to myself, to property, or to third parties. I understand that such risks simply cannot be eliminated without jeopardizing the essential qualities of the activity.
-      <p><strong>The risks include, among other things:</strong> slips and falls; falls from significant heights; the possibility of rough terrain; passengers can be jolted, jarred, bounced around, thrown about and otherwise shaken during rides; it is possible that riders could be injured if they come into contact with other passengers or equipment; injuries can be sustained from the trail, equipment or from items on the trail such as holes, bumps, ruts, obstacles, tree limbs and branches or rocks; riding on uneven and out of control terrain, changing snow conditions and variations in elevations; snow depth, instability of snow pack; steepness of slopes; loss of nature including extremes of weather, lightning and rapid weather changes, exposure to sun, strong wind, cold, large waves, eddies and whirlpools, tidal conditions, surf and currents; major injuries are a risk as are sprains, strains, scratches, bruises, abrasions, cuts, lacerations, broken bones, fractures, musculoskeletal injuries including head, neck, and back injuries; injuries to internal organs; loss of fingers or other appendages; exposure to the elements of the outdoors and natural surroundings which could cause heat exhaustion, heat stroke, sunburn, frostbite, frost nip, dehydration; and exposure to potentially dangerous wild animals, insect bites, and hazardous plant life; the negligence of participants, or other persons who may be present, or traveling in remote areas; or varying and difficult weather; further, passengers can be thrown off the vehicle which can result in any of the above events occurring; collision with fixed or movable objects; collisions, and flipping over; transmissible pathogen or disease; accidents or illness can occur in remote places without medical facilities and emergency treatment or other services rendered; any machine itself may fail; and accidents can occur getting in, out, on or off; traveling to and from activity locations raises the possibility of any manner of transportation accidents; additionally, fatigue, chill and/or dizziness may diminish my/our reaction time and increase the risk of an accident.</p>
-      </li>
-      <li>I expressly agree and promise to accept and assume all of the risks existing in this activity. My participation in this activity is purely voluntary, and I elect to participate in spite of the risks. I agree to wear a properly fitted and secured DOT or SNELL certified helmet while participating in UTV, Snowmobiling, and Ice Climbing Activities. Additionally, I agree to wear a U.S. Coast Guard-approved personal flotation device (life jacket) while participating in all water activities.</li>
-      <li>I hereby voluntarily release, forever discharge, and agree to indemnify and hold harmless AUA from any and all claims, demands, or causes of action, which are in any way connected with my participation in this activity or my use of AUA&rsquo;s equipment or facilities, including any such claims which allege negligent acts or omissions of AUA.</li>
-      <li>Should AUA or anyone acting on their behalf be required to incur attorney&rsquo;s fees and costs to enforce this agreement, I agree to indemnify and hold them harmless for all such fees and costs.</li>
-      <li>I certify that I have adequate insurance to cover any injury or damage I may cause or suffer while participating, or else I agree to bear the costs of such injury or damage myself. I further certify that I am willing to assume the risk of any medical or physical condition I may have.</li>
-      <li>In the event that I file a lawsuit against AUA, I agree to do so solely in the state of Alaska, and I further agree that the substantive law of that state shall apply in that action without regard to the conflict of law rules of that state. I agree that if any portion of this agreement is found to be void or unenforceable, the remaining document shall remain in full force and effect.</li>
-    </ol>
-    <p>By signing this document, I acknowledge that if anyone is hurt or property is damaged during my participation in this activity, I may be found by a court of law to have waived my right to maintain a lawsuit against AUA on the basis of any claim from which I have released them herein. I also agree that this document is valid for subsequent visits and participation at AUA. I have had sufficient opportunity to read this entire document. I have read and understood it, and I agree to be bound by its terms.</p>
+    <p id="waiver-intro"></p>
+    <ol id="waiver-items"></ol>
+    <p id="waiver-closing"></p>
   </div>
 
   <form id="waiver-form">
@@ -389,15 +396,50 @@
   submitBtn.disabled = true;
   submitBtn.textContent = "Loading...";
 
-  fetch("./config.json")
-    .then((r) => (r.ok ? r.json() : Promise.reject(new Error("config.json not found"))))
-    .then((config) => {
+  const companyLink = document.getElementById("company-link");
+  const waiverTitleEl = document.getElementById("waiver-title");
+  const waiverIntroEl = document.getElementById("waiver-intro");
+  const waiverItemsEl = document.getElementById("waiver-items");
+  const waiverClosingEl = document.getElementById("waiver-closing");
+
+  Promise.all([
+    fetch("./config.json").then((r) =>
+      r.ok ? r.json() : Promise.reject(new Error("config.json not found"))
+    ),
+    fetch("./waiver-content.json").then((r) =>
+      r.ok ? r.json() : Promise.reject(new Error("waiver-content.json not found"))
+    ),
+  ])
+    .then(([config, content]) => {
       if (typeof config.ownerEmail === "string") {
         ownerEmail = config.ownerEmail;
       }
       if (typeof config.minorAgeThreshold === "number" && config.minorAgeThreshold > 0) {
         minorAgeThreshold = config.minorAgeThreshold;
       }
+      if (typeof config.companyName === "string" && config.companyName) {
+        companyLink.textContent = config.companyName;
+        document.title = "Liability Waiver — " + config.companyName;
+      }
+      if (typeof config.companyUrl === "string" && config.companyUrl) {
+        companyLink.href = config.companyUrl;
+      } else {
+        const span = document.createElement("span");
+        span.className = "company-link";
+        span.textContent = companyLink.textContent;
+        companyLink.replaceWith(span);
+      }
+
+      waiverTitleEl.textContent = content.title || "";
+      waiverIntroEl.textContent = content.intro || "";
+      waiverItemsEl.innerHTML = "";
+      (content.items || []).forEach((item) => {
+        const li = document.createElement("li");
+        li.textContent = item;
+        waiverItemsEl.appendChild(li);
+      });
+      waiverClosingEl.textContent = content.closing || "";
+
       updateMinorStatus();
       updateGuardianDobHint();
       if (!config.supabaseUrl || !config.supabaseAnonKey) {
