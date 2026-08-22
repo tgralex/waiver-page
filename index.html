@@ -328,11 +328,14 @@
   <div class="confirmation" id="confirmation">
     <h2>Thank you, waiver signed</h2>
     <p>Your signature has been recorded. You may now close this page.</p>
+    <button type="button" class="btn-submit" id="download-btn">Download my waiver</button>
   </div>
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/signature_pad@4.1.7/dist/signature_pad.umd.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="https://cdn.jsdelivr.net/npm/pdf-lib@1.17.1/dist/pdf-lib.min.js"></script>
+<script src="./waiver-pdf.js"></script>
 <script>
   let supabaseClient = null;
   let ownerEmail = null;
@@ -506,24 +509,26 @@
     submitBtn.disabled = true;
     submitBtn.textContent = "Submitting...";
 
+    const submissionData = {
+      name: name,
+      email: email || null,
+      signedDate: signedDate,
+      signatureImage: pad.toDataURL("image/png"),
+      dob: document.getElementById("dob").value || null,
+      phone: fieldValue("phone") || null,
+      address: fieldValue("address") || null,
+      city: fieldValue("city") || null,
+      state: fieldValue("state") || null,
+      zip: fieldValue("zip") || null,
+      minorInfo: minorInfo || null,
+      guardianPrintName: guardianPrintName || null,
+      guardianSignatureImage: guardianPad.isEmpty() ? null : guardianPad.toDataURL("image/png"),
+      guardianDate: guardianDate || null,
+      ownerEmail: ownerEmail
+    };
+
     const { error } = await supabaseClient.functions.invoke("wv-submit-waiver", {
-      body: {
-        name: name,
-        email: email || null,
-        signedDate: signedDate,
-        signatureImage: pad.toDataURL("image/png"),
-        dob: document.getElementById("dob").value || null,
-        phone: fieldValue("phone") || null,
-        address: fieldValue("address") || null,
-        city: fieldValue("city") || null,
-        state: fieldValue("state") || null,
-        zip: fieldValue("zip") || null,
-        minorInfo: minorInfo || null,
-        guardianPrintName: guardianPrintName || null,
-        guardianSignatureImage: guardianPad.isEmpty() ? null : guardianPad.toDataURL("image/png"),
-        guardianDate: guardianDate || null,
-        ownerEmail: ownerEmail
-      }
+      body: submissionData
     });
 
     if (error) {
@@ -533,8 +538,26 @@
       return;
     }
 
+    lastSubmittedWaiver = submissionData;
     form.style.display = "none";
     document.getElementById("confirmation").style.display = "block";
+  });
+
+  let lastSubmittedWaiver = null;
+  const downloadBtn = document.getElementById("download-btn");
+  downloadBtn.addEventListener("click", async () => {
+    if (!lastSubmittedWaiver || !window.WaiverPDF) return;
+    downloadBtn.disabled = true;
+    const originalText = downloadBtn.textContent;
+    downloadBtn.textContent = "Preparing PDF...";
+    try {
+      await window.WaiverPDF.downloadWaiverPdf(lastSubmittedWaiver, "AUA_Signed_Waiver.pdf");
+    } catch (err) {
+      console.error(err);
+    } finally {
+      downloadBtn.disabled = false;
+      downloadBtn.textContent = originalText;
+    }
   });
 </script>
 </body>
