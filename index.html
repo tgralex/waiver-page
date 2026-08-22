@@ -585,7 +585,8 @@
       guardianPrintName: guardianPrintName || null,
       guardianSignatureImage: guardianPad.isEmpty() ? null : guardianPad.toDataURL("image/png"),
       guardianDate: guardianDate || null,
-      ownerEmail: ownerEmail
+      ownerEmail: ownerEmail,
+      minorAgeThreshold: minorAgeThreshold
     };
 
     const { error } = await supabaseClient.functions.invoke("wv-submit-waiver", {

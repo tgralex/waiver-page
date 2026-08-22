@@ -191,6 +191,7 @@ const WAIVER_CLOSING =
     if (data.minorInfo || data.guardianSignatureImage || data.guardianPrintName) {
       y -= 6;
       drawLine('Parent/Guardian Additional Indemnification', 12, boldFont);
+      drawLine(`(Must be completed for participants under the age of ${data.minorAgeThreshold || 18})`, 9, font);
       y -= 2;
       if (data.minorInfo) {
         drawWrapped(`Minor(s): ${data.minorInfo}`, 10, font, 6);
